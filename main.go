@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"rate-limiter-service/routes"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -44,7 +44,7 @@ func main() {
 	// }
 	// fmt.Println(readRule)
 
-	// UpdateItem
+	// UpdateRule
 	// rule := dynamodb.Rule{
 	// 	RuleName: "chat-sigma-api-chat-message",
 	// 	ParamName: "send-message",
@@ -58,7 +58,7 @@ func main() {
 	// }
 	// fmt.Println(updadedRule)
 
-	// DeleteItem
+	// DeleteRule
 	// deletedRule, err := dynamodb.DeleteRule("chat-sigma-api-chat-message", "rate-limiter-rules")
 	// if err != nil {
 	// 	return
