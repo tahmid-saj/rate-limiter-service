@@ -2,7 +2,7 @@ package routes
 
 import "github.com/gin-gonic/gin"
 
-func Routes(server *gin.Engine) {
+func RegisterRoutes(server *gin.Engine) {
 	// Rules
 	server.GET("/rules") //ListRules
 	server.GET("/rules/:ruleName") // ReadRule
