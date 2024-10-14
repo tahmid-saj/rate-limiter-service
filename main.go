@@ -1,22 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"rate-limiter-service/dynamodb"
-	"time"
+	"os"
+	"rate-limiter-service/routes"
+	
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
-
-// "os"
-// "rate-limiter-service/routes"
-
-// "github.com/gin-gonic/gin"
-// "github.com/joho/godotenv"
-
-// "os"
-// "rate-limiter-service/routes"
-
-// "github.com/gin-gonic/gin"
-// "github.com/joho/godotenv"
 
 func main() {
 	// CreateTable
@@ -131,11 +121,24 @@ func main() {
 	// }
 	// fmt.Print(deletedRequest)
 
-	// godotenv.Load()
+	// SendRequest
+	// requestOk, err := slidingwindow.SendRequest(
+	// 	"1044eb44-c478-4caa-ad8a-0ec43a4a8495", 
+	// 	"chat-sigma-api-chat-message", 
+	// 	"send-message", 
+	// 	"rate-limiter-sliding-window-logs",
+	// 	"rate-limiter-rules",
+	// )
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Print(requestOk)
 
-	// server := gin.Default()
+	godotenv.Load()
 
-	// routes.RegisterRoutes(server)
+	server := gin.Default()
 
-	// server.Run(os.Getenv("PORT"))
+	routes.RegisterRoutes(server)
+
+	server.Run(os.Getenv("PORT"))
 }
