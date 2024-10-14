@@ -11,8 +11,8 @@ func RegisterRoutes(server *gin.Engine) {
 	server.DELETE("/rules/:ruleName", deleteRule) // DeleteRule
 
 	// Sliding window logs
-	server.GET("/sliding-window-logs/:requestID") //ReadRequest
-	server.POST("/sliding-window-logs/:requestID") //SendRequest (rate limiting)
-	server.PUT("/sliding-window-logs/:requestID") //UpdateRequest
-	server.DELETE("/sliding-window-logs/:requestID") //DeleteRequest
+	server.POST("/sliding-window-logs/:requestID/read", readRequest) //ReadRequest
+	server.POST("/sliding-window-logs/:requestID", sendRequest) //SendRequest (rate limiting)
+	server.PUT("/sliding-window-logs/:requestID", updateRequest) //UpdateRequest
+	server.POST("/sliding-window-logs/:requestID/delete", deleteRequest) //DeleteRequest
 }
