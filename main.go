@@ -8,6 +8,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// "os"
+// "rate-limiter-service/routes"
+
+// "github.com/gin-gonic/gin"
+// "github.com/joho/godotenv"
+
 func main() {
 	// CreateTable
 	// createdTable, err := dynamodb.CreateTable("rate-limiter-rules")
