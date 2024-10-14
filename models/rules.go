@@ -13,11 +13,6 @@ type RuleInput struct {
 	WindowTime     string `json:"windowTime"`
 }
 
-type Response struct {
-	Ok       bool        `json:"ok"`
-	Response interface{} `json:"response"`
-}
-
 func ListRules() (*Response, error) {
 	return nil, nil
 }
