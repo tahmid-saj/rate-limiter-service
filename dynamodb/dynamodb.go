@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -21,6 +22,17 @@ type Rule struct {
 	Limit int
 	WindowInterval int
 	WindowTime string
+}
+
+type SlidingWindowLogRequest struct {
+	RequestID string
+	LogRequests []LogRequests
+}
+
+type LogRequests struct {
+	Timestamp time.Time
+	RuleName string
+	ParamName string
 }
 
 func ListTables() ([]string, error) {
@@ -76,7 +88,9 @@ func ListTables() ([]string, error) {
 	return tableNames, nil
 }
 
-func CreateTable(tableName string) (*dynamodb.CreateTableOutput, error) {
+// Rule operations
+
+func CreateRuleTable(tableName string) (*dynamodb.CreateTableOutput, error) {
 	// Initialize a session that the SDK will use to load
 	// credentials from the shared credentials file ~/.aws/credentials
 	// and region from the shared configuration file ~/.aws/config.
@@ -310,6 +324,210 @@ func DeleteRule(ruleName, tableName string) (*dynamodb.DeleteItemOutput, error) 
 
 	result, err := svc.DeleteItem(input)
 	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// SlidingWindowLog operations
+
+func CreateSlidingWindowLogTable(tableName string) (*dynamodb.CreateTableOutput, error) {
+	// Initialize a session that the SDK will use to load
+	// credentials from the shared credentials file ~/.aws/credentials
+	// and region from the shared configuration file ~/.aws/config.
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	// Create DynamoDB client
+	svc := dynamodb.New(sess)
+
+	// Create the table input with "RequestID" as the primary key (HASH)
+	input := &dynamodb.CreateTableInput{
+		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("RequestID"), // Define RequestID attribute
+				AttributeType: aws.String("S"),         // RequestID is a string (S)
+			},
+		},
+		KeySchema: []*dynamodb.KeySchemaElement{
+			{
+				AttributeName: aws.String("RequestID"), // Primary key (HASH)
+				KeyType:       aws.String("HASH"),
+			},
+		},
+		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+			ReadCapacityUnits:  aws.Int64(10),
+			WriteCapacityUnits: aws.Int64(10),
+		},
+		TableName: aws.String(tableName),
+	}
+
+	// Create the table
+	result, err := svc.CreateTable(input)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	return result, nil
+}
+
+
+func AddRequest(item SlidingWindowLogRequest, tableName string) (*dynamodb.PutItemOutput, error) {
+	// Initialize a session that the SDK will use to load
+	// credentials from the shared credentials file ~/.aws/credentials
+	// and region from the shared configuration file ~/.aws/config.
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	// Create DynamoDB client
+	svc := dynamodb.New(sess)
+
+	attributeValue, err := dynamodbattribute.MarshalMap(item)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	input := &dynamodb.PutItemInput{
+		Item:      attributeValue,
+		TableName: aws.String(tableName),
+	}
+
+	result, err := svc.PutItem(input)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func ReadRequest(requestID, tableName string) (*SlidingWindowLogRequest, error) {
+	// Initialize a session that the SDK will use to load
+	// credentials from the shared credentials file ~/.aws/credentials
+	// and region from the shared configuration file ~/.aws/config.
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	// Create DynamoDB client
+	svc := dynamodb.New(sess)
+
+	result, err := svc.GetItem(&dynamodb.GetItemInput{
+    TableName: aws.String(tableName),
+    Key: map[string]*dynamodb.AttributeValue{
+			"RuleName": {
+				S: aws.String(requestID),
+			},
+    },
+	})
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	if result.Item == nil {
+    msg := "Could not find '" + requestID + "'"
+    return nil, errors.New(msg)
+	}
+			
+	var item *SlidingWindowLogRequest
+
+	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	return item, nil
+}
+
+func UpdateRequest(updatedValue SlidingWindowLogRequest, tableName string) (*dynamodb.UpdateItemOutput, error) {
+	// Initialize a session that the SDK will use to load credentials
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	// Create DynamoDB client
+	svc := dynamodb.New(sess)
+
+	// Prepare the update expression and the attribute values
+	// LogRequests will be serialized as a list of maps
+	logRequestsAttributeValue := &dynamodb.AttributeValue{
+		L: make([]*dynamodb.AttributeValue, len(updatedValue.LogRequests)),
+	}
+
+	for i, logRequest := range updatedValue.LogRequests {
+		logRequestsAttributeValue.L[i] = &dynamodb.AttributeValue{
+			M: map[string]*dynamodb.AttributeValue{
+				"Timestamp": {
+					S: aws.String(logRequest.Timestamp.Format(time.RFC3339)), // Format time as string
+				},
+				"RuleName": {
+					S: aws.String(logRequest.RuleName),
+				},
+				"ParamName": {
+					S: aws.String(logRequest.ParamName),
+				},
+			},
+		}
+	}
+
+	// Prepare the UpdateItemInput
+	input := &dynamodb.UpdateItemInput{
+		TableName: aws.String(tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"RequestID": {
+				S: aws.String(updatedValue.RequestID), // Partition key
+			},
+		},
+		ExpressionAttributeNames: map[string]*string{
+			"#LR": aws.String("LogRequests"),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":lr": logRequestsAttributeValue,
+		},
+		UpdateExpression: aws.String("SET #LR = :lr"),
+		ReturnValues:     aws.String("UPDATED_NEW"),
+	}
+
+	// Execute the update
+	result, err := svc.UpdateItem(input)
+	if err != nil {
+		log.Printf("Failed to update item: %v", err)
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func DeleteRequest(requestID, tableName string) (*dynamodb.DeleteItemOutput, error) {
+	// Initialize a session that the SDK will use to load credentials
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	// Create DynamoDB client
+	svc := dynamodb.New(sess)
+
+	// Prepare the DeleteItemInput with RequestID as the key
+	input := &dynamodb.DeleteItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
+			"RequestID": {
+				S: aws.String(requestID), // Partition key
+			},
+		},
+		TableName: aws.String(tableName),
+	}
+
+	// Execute the delete
+	result, err := svc.DeleteItem(input)
+	if err != nil {
+		log.Printf("Failed to delete item: %v", err)
 		return nil, err
 	}
 
