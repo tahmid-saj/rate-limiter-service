@@ -374,7 +374,6 @@ func CreateSlidingWindowLogTable(tableName string) (*dynamodb.CreateTableOutput,
 	return result, nil
 }
 
-
 func AddRequest(item SlidingWindowLogRequest, tableName string) (*dynamodb.PutItemOutput, error) {
 	// Initialize a session that the SDK will use to load
 	// credentials from the shared credentials file ~/.aws/credentials
@@ -420,7 +419,7 @@ func ReadRequest(requestID, tableName string) (*SlidingWindowLogRequest, error) 
 	result, err := svc.GetItem(&dynamodb.GetItemInput{
     TableName: aws.String(tableName),
     Key: map[string]*dynamodb.AttributeValue{
-			"RuleName": {
+			"RequestID": {
 				S: aws.String(requestID),
 			},
     },

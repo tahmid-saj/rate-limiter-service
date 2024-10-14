@@ -1,3 +1,5 @@
 package slidingwindow
 
-func SendRequest
+// func SendRequest(requestID, tableName string) (bool, error) {
+
+// }

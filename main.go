@@ -1,12 +1,16 @@
 package main
 
 import (
-	"os"
-	"rate-limiter-service/routes"
-
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
+	"fmt"
+	"rate-limiter-service/dynamodb"
+	"time"
 )
+
+// "os"
+// "rate-limiter-service/routes"
+
+// "github.com/gin-gonic/gin"
+// "github.com/joho/godotenv"
 
 // "os"
 // "rate-limiter-service/routes"
@@ -71,11 +75,67 @@ func main() {
 	// }
 	// fmt.Println(deletedRule)
 
-	godotenv.Load()
+	// Sliding window ops
+	// CreateSlidingWindowLogTable
+	// createdTable, err := dynamodb.CreateSlidingWindowLogTable("rate-limiter-sliding-window-logs")
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Print(createdTable)
 
-	server := gin.Default()
+	// AddRequest
+	// request := dynamodb.SlidingWindowLogRequest{
+	// 	RequestID: "1044eb44-c478-4caa-ad8a-0ec43a4a8495",
+	// 	LogRequests: []dynamodb.LogRequests{
+	// 		dynamodb.LogRequests{
+	// 			Timestamp: time.Now(),
+	// 			RuleName: "chat-sigma-api-chat-message",
+	// 			ParamName: "send-message",
+	// 		},
+	// 	},
+	// }
+	// addedRequest, err := dynamodb.AddRequest(request, "rate-limiter-sliding-window-logs")
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Print(addedRequest)
 
-	routes.RegisterRoutes(server)
+	// ReadRequest
+	// readRequest, err := dynamodb.ReadRequest("1044eb44-c478-4caa-ad8a-0ec43a4a8495", "rate-limiter-sliding-window-logs")
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Print(readRequest)
 
-	server.Run(os.Getenv("PORT"))
+	// UpdateRequest
+	// request := dynamodb.SlidingWindowLogRequest{
+	// 	RequestID: "1044eb44-c478-4caa-ad8a-0ec43a4a8495",
+	// 	LogRequests: []dynamodb.LogRequests{
+	// 		dynamodb.LogRequests{
+	// 			Timestamp: time.Now(),
+	// 			RuleName: "chat-sigma-api-chat-message",
+	// 			ParamName: "send-message",
+	// 		},
+	// 	},
+	// }
+	// updatedRequest, err := dynamodb.UpdateRequest(request, "rate-limiter-sliding-window-logs")
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Print(updatedRequest)
+
+	// DeleteRequest
+	// deletedRequest, err := dynamodb.DeleteRequest("1044eb44-c478-4caa-ad8a-0ec43a4a8495", "rate-limiter-sliding-window-logs")
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Print(deletedRequest)
+
+	// godotenv.Load()
+
+	// server := gin.Default()
+
+	// routes.RegisterRoutes(server)
+
+	// server.Run(os.Getenv("PORT"))
 }
