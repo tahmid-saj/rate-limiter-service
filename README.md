@@ -24,22 +24,26 @@ rate-limiter-service/
 
 ```
 
+<br/>
+<br/>
+
 ## Overview
 
 ### Design
 
-The high level design of the rate limiter can be found below. Similar services can be found <a href="https://whimsical.com/web-microservices-6uqvwWZtcBFsNJB2hepGy1">here</a> and below:
+The high level workflow of the rate limiter can be found below. Similar services can be found <a href="https://whimsical.com/web-microservices-6uqvwWZtcBFsNJB2hepGy1">here</a> and below:
 
 #### Rate limiter workflow
+
+<img width="508" alt="image" src="https://github.com/user-attachments/assets/a343b5ff-ddf1-4a5e-81c8-c26aa71e570b">
 
 #### Similar services
 
 <img width="834" alt="image" src="https://github.com/user-attachments/assets/b54088e7-870c-46dd-9cf6-2e5ec27d9d5c">
 
-### 
+### Examples
 
-
-Sample rule:
+#### Sample rule
 ```
 {
   "RuleName": {
@@ -60,10 +64,7 @@ Sample rule:
 }
 ```
 
-<br/>
-<br/>
-
-Sample logged requests in sliding window:
+#### Sample logged requests in sliding window
 ```
 {
   "RequestID": {
