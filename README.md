@@ -5,6 +5,40 @@ Rate limiter service to limit requests using a sliding window (with logging) app
 <br/>
 <br/>
 
+## Directory structure
+
+The directory structure is as follows:
+
+```
+rate-limiter-service/
+├── dynamodb/                # Code related to setting up and interacting with DynamoDB for request logs and rules
+├── models/                  # Contains data models for requests and rate-limiting rules
+├── routes/                  # API route definitions using Gin framework
+├── sliding-window/           # Logic for the sliding window algorithm used to limit requests
+├── utils/                   # Utility functions (e.g., helpers for logging, error handling)
+├── .gitignore               # Specifies files to ignore in version control
+├── README.md                # Project overview, setup, and usage instructions
+├── go.mod                   # Go module dependencies
+├── go.sum                   # Hashes for Go module dependencies
+└── main.go                  # Entry point for the rate limiter service
+
+```
+
+## Overview
+
+### Design
+
+The high level design of the rate limiter can be found below. Similar services can be found <a href="https://whimsical.com/web-microservices-6uqvwWZtcBFsNJB2hepGy1">here</a> and below:
+
+#### Rate limiter workflow
+
+#### Similar services
+
+<img width="834" alt="image" src="https://github.com/user-attachments/assets/b54088e7-870c-46dd-9cf6-2e5ec27d9d5c">
+
+### 
+
+
 Sample rule:
 ```
 {
